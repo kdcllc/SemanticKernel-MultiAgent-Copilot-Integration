@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemanticKernel-MultiAgent-Copilot-Integration", "SemanticKernel-MultiAgent-Copilot-Integration.csproj", "{343B260A-C636-0E17-4453-97E181A74305}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{343B260A-C636-0E17-4453-97E181A74305}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{343B260A-C636-0E17-4453-97E181A74305}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{343B260A-C636-0E17-4453-97E181A74305}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{343B260A-C636-0E17-4453-97E181A74305}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {53231453-0D24-477A-8635-3F1D30B3FB7B}
+	EndGlobalSection
+EndGlobal
