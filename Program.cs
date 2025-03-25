@@ -30,11 +30,13 @@ internal class Program
 
         // Initialize configuration and logging
         var configurationBuilder = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddEnvironmentVariables();
 
         _configuration = configurationBuilder.Build();
+
+        var list = _configuration.AsEnumerable().ToList();
 
         var loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -251,29 +253,24 @@ internal class Program
     {
         var kernelBuilder = Kernel.CreateBuilder();
 
-        // Initialize Kernel using OpenAI models
-        var type = _configuration?["OPENAI_TYPE"];
-        var deploymentName = _configuration?["AZURE_OPENAI_MODEL"];
-        var endpoint = _configuration?["AZURE_OPENAI_ENDPOINT"];
-        var apiKey = _configuration?["AZURE_OPENAI_API_KEY"];
+        var openAIConfig = _configuration?.GetSection("OpenAI");
+        var apiKey = openAIConfig?["ApiKey"];
+        var modelId = openAIConfig?["ModelId"];
 
-        if (string.IsNullOrEmpty(type) 
-            || string.IsNullOrEmpty(deploymentName) 
-            || string.IsNullOrEmpty(endpoint) 
-            || string.IsNullOrEmpty(apiKey))
-        {
-            _logger?.LogError("One or more required configuration values are missing: OPENAI_TYPE, AZURE_OPENAI_MODEL, AZURE_OPENAI_ENDPOINT, or AZURE_OPENAI_API_KEY.");
-            throw new InvalidOperationException("Configuration values for OPENAI_TYPE, AZURE_OPENAI_MODEL, AZURE_OPENAI_ENDPOINT, or AZURE_OPENAI_API_KEY are missing.");
-        }
+        var azureOpenAIConfig = _configuration?.GetSection("AzureOpenAI");
+        var endpoint = azureOpenAIConfig?["Endpoint"];
+        var azureApiKey = azureOpenAIConfig?["ApiKey"];
+        var modelDeploymentName = azureOpenAIConfig?["ChatDeploymentName"];
+
         // Add OpenAI Chat Completion service
-        if (type == "OPENAI")
+        if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(modelId))
         {
-           kernelBuilder.AddOpenAIChatCompletion(modelId: deploymentName, apiKey: apiKey);
+           kernelBuilder.AddOpenAIChatCompletion(modelId: modelId, apiKey: apiKey);
         }
         else
         {
             kernelBuilder.AddAzureOpenAIChatCompletion(
-                deploymentName: deploymentName,
+                deploymentName: modelDeploymentName,
                 endpoint: endpoint,
                 apiKey: apiKey
             );
