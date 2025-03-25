@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using caps.util;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -24,6 +25,16 @@ internal class Program
     
     private static async Task Main(string[] args)
     {
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole();
+        });
+
+        // var accessToken = AzAccessTokenFetcher.GetAccessToken();
+
+        // var entra = new EntraAppRegistration(loggerFactory.CreateLogger<EntraAppRegistration>());
+        // await entra.CreateAppAsync(accessToken, cancellationToken: default);
+
         var root = Directory.GetCurrentDirectory();
         var dotenv = Path.Combine(root, ".env");
         DotEnv.Load(dotenv);
@@ -38,10 +49,7 @@ internal class Program
 
         var list = _configuration.AsEnumerable().ToList();
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddConsole();
-        });
+
         _logger = loggerFactory.CreateLogger<Program>();
         var bearerLogger = loggerFactory.CreateLogger<BearerAuthenticationProviderWithCancellationToken>();
 

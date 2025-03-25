@@ -15,7 +15,7 @@ public class AzAccessTokenFetcher
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "az",
-                    Arguments = "account get-access-token",
+                    Arguments = "account get-access-token --resource https://graph.microsoft.com",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,

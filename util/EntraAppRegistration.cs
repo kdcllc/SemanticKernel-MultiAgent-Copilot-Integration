@@ -14,39 +14,39 @@ public class EntraAppRegistration(ILogger<EntraAppRegistration> logger)
         // https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread
         ("465a38f9-76ea-45b9-9f34-9e8b0d4b0b42", "Calendars.Read"), // Read user calendars
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsreadwrite
-    ("e1fe6dd8-ba31-4d61-89e7-88639da4683d", "Calendars.ReadWrite"), // Full access to user calendars
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsreadwrite
+        ("e1fe6dd8-ba31-4d61-89e7-88639da4683d", "Calendars.ReadWrite"), // Full access to user calendars
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#contactsread
-    ("d56682ec-c09e-4743-aaf4-1a3aac4caa21", "Contacts.Read"), // Read user contacts
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#contactsread
+        ("d56682ec-c09e-4743-aaf4-1a3aac4caa21", "Contacts.Read"), // Read user contacts
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#email
-    ("e7b3fbb9-0b0d-4c8f-8f69-5f1b3c7e4c3d", "email"), // View users' email address
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#email
+        ("64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0", "email"), // View users' email address
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
-    ("b340eb25-3456-403f-be2f-af7a0d370277", "Files.Read.All"), // Read all files that user can access
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#filesreadall
+        ("df85f4d6-205c-4ac5-a5ea-6bf408dba283", "Files.Read.All"), // Read all files that user can access
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#mailread
-    ("64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0", "Mail.Read"), // Read user mail
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#mailread
+        ("570282fd-fa5c-430d-a7fd-fc8dc98a9dca", "Mail.Read"), // Read user mail
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
-    ("e2a3a72e-5f79-4c64-b1b1-878b674786c9", "Mail.ReadWrite"), // Read and write access to user mail
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadwrite
+        ("024d486e-b451-40bb-833d-3e66d98c5c73	", "Mail.ReadWrite"), // Read and write access to user mail
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#mailsend
-    ("e383f46e-2787-4529-855e-0e479a3ffac0", "Mail.Send"), // Send mail as a user
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#mailsend
+        ("e383f46e-2787-4529-855e-0e479a3ffac0", "Mail.Send"), // Send mail as a user
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#tasksread
-    ("5c9b5f0e-8b6c-4a26-8dc3-3f5b5c9a8b6c", "Tasks.Read"), // Read user's tasks and task lists
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#tasksread
+        ("f45671fb-e0fe-4b4b-be20-3d3ce43f1bcb", "Tasks.Read"), // Read user's tasks and task lists
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#tasksreadwrite
-    ("5c9b5f0e-8b6c-4a26-8dc3-3f5b5c9a8b6d", "Tasks.ReadWrite"), // Create, read, update, and delete user's tasks and task lists
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#tasksreadwrite
+        ("2219042f-cab5-40cc-b0d2-16b1540b4c5f", "Tasks.ReadWrite"), // Create, read, update, and delete user's tasks and task lists
 
-    // https://learn.microsoft.com/en-us/graph/permissions-reference#userread
-    ("b340eb25-3456-403f-be2f-af7a0d370277", "User.Read") // Sign in and read user profile
+        // https://learn.microsoft.com/en-us/graph/permissions-reference#userread
+        ("b340eb25-3456-403f-be2f-af7a0d370277", "User.Read") // Sign in and read user profile
     ];
 
     public async Task<AppRegistrationResult> CreateAppAsync(
-        string accessToken, 
+        string accessToken,
         CancellationToken cancellationToken)
     {
         var graphClient = GetGraphClient(accessToken);
@@ -58,7 +58,7 @@ public class EntraAppRegistration(ILogger<EntraAppRegistration> logger)
                 .Select(ra => new ResourceAccess
                 {
                     Id = new Guid(ra.Id),
-                    Type = "Role"
+                    Type = "Scope" //"Role" for Application and "Scope" for Delegated permissions
                 }).ToList()
         };
 
@@ -89,30 +89,51 @@ public class EntraAppRegistration(ILogger<EntraAppRegistration> logger)
 
         };
 
-        var createdApplication = await graphClient.Applications.PostAsync(application);
+        Application createdApplication = null;
 
-        if (createdApplication == null)
+        try
         {
+            createdApplication = await graphClient.Applications.PostAsync(application);
+
+            if (createdApplication == null)
+            {
+                return result;
+            }
+        }
+        catch (Microsoft.Graph.Models.ODataErrors.ODataError ex)
+        {
+            logger.LogError(ex, "Failed to create app");
             return result;
         }
+        catch (System.Exception)
+        {
+            throw;
+        }
+
 
         var appId = createdApplication.AppId ?? string.Empty;
         var secret = createdApplication?.PasswordCredentials?[0]?.SecretText ?? string.Empty;
 
         var spId = await CreateServicePrincipalAsync(appId, graphClient, cancellationToken);
 
-        var grantResult = await GrantRoleAsync(accessToken, spId, cancellationToken);
+        // var grantResult = await GrantRoleAsync(accessToken, spId, cancellationToken);
 
         result.AppId = appId;
         result.Secret = secret;
         result.ServicePrincipleId = spId;
         result.TenantId = await GetTenantIdAsync(accessToken, cancellationToken);
 
+        // log all of the result properties
+        logger.LogInformation("AppId: {AppId}", result.AppId);
+        logger.LogInformation("Secret: {Secret}", result.Secret);
+        logger.LogInformation("ServicePrincipleId: {ServicePrincipleId}", result.ServicePrincipleId);
+        logger.LogInformation("TenantId: {TenantId}", result.TenantId);
+
         return result;
     }
 
     private async Task<string> GetTenantIdAsync(
-        string accessToken, 
+        string accessToken,
         CancellationToken cancellationToken)
     {
         var graphClient = GetGraphClient(accessToken);
