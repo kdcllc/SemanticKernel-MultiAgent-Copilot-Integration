@@ -272,7 +272,7 @@ internal class Program
             kernelBuilder.AddAzureOpenAIChatCompletion(
                 deploymentName: modelDeploymentName,
                 endpoint: endpoint,
-                apiKey: apiKey
+                apiKey: azureApiKey
             );
         }
         
