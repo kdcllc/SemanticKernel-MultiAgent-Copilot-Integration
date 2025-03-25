@@ -86,7 +86,7 @@ public class EntraAppRegistration(ILogger<EntraAppRegistration> logger)
                     EnableIdTokenIssuance = true     // Enable ID Tokens
                 }
             },
-
+            IsFallbackPublicClient = true // Enable public client flows
         };
 
         Application createdApplication = null;

@@ -31,9 +31,9 @@ internal class Program
         });
 
         // var accessToken = AzAccessTokenFetcher.GetAccessToken();
-
         // var entra = new EntraAppRegistration(loggerFactory.CreateLogger<EntraAppRegistration>());
-        // await entra.CreateAppAsync(accessToken, cancellationToken: default);
+        // var app = await entra.CreateAppAsync(accessToken, cancellationToken: default);
+        // return;
 
         var root = Directory.GetCurrentDirectory();
         var dotenv = Path.Combine(root, ".env");
