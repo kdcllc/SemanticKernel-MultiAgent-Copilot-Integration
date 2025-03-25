@@ -1,8 +1,16 @@
-# 
-- https://learn.microsoft.com/en-us/graph/permissions-reference
+# Create Microsoft Entra App Registration to be used with Copilot Agent Plugins
 
+Azure CLI must be installed and device flow used with an account that allows to create apps.
+
+```bash
+    az login --use-device-code
+```
+
+[Manually register the app](https://github.com/microsoft/semantic-kernel/blob/c669f74099629db40c281397886ae5d81856e9e4/dotnet/samples/Demos/CopilotAgentPlugins/README.md)
 
 ## Delegated Permissions:
+
+[Microsoft Graph permissions reference](https://learn.microsoft.com/en-us/graph/permissions-reference)
 
 1. **Calendars.Read** - Read user calendars
 2. **Calendars.ReadWrite** - Have full access to user calendars
